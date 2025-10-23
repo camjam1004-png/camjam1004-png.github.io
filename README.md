@@ -1,2 +1,201 @@
-# camjam1004-png.github.io
-dailybibleverse
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Daily Bible Verse — KJV (Serif)</title>
+<style>
+  :root{--text-size:20px;}
+  html,body{height:100%;background:transparent;}
+  body{
+    margin:0;
+    padding:18px;
+    font-family: Georgia, "Times New Roman", Times, serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: #111;
+    -webkit-font-smoothing:antialiased;
+  }
+  .card{
+    background: rgba(255,255,255,0.0); /* transparent */
+    padding: 14px 18px;
+    border-radius:10px;
+    max-width:720px;
+    width:100%;
+    box-sizing:border-box;
+    text-align:center;
+  }
+  .verse{
+    font-size: calc(var(--text-size));
+    line-height:1.45;
+    margin: 10px 0 6px;
+  }
+  .ref{
+    font-weight:600;
+    letter-spacing:0.02em;
+    margin-top:6px;
+  }
+  .meta{font-size:12px;color:rgba(0,0,0,0.55); margin-top:8px;}
+  @media (max-width:420px){
+    :root{--text-size:18px;}
+    body{padding:12px;}
+  }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="verse" id="verse">Loading...</div>
+    <div class="ref" id="ref"></div>
+    <div class="meta">King James Version (KJV)</div>
+  </div>
+
+<script>
+(function(){
+  // 100 KJV verses (text and reference). Public domain (KJV).
+  const verses = [
+    {text:"In the beginning God created the heaven and the earth.", ref:"Genesis 1:1"},
+    {text:"The LORD is my shepherd; I shall not want.", ref:"Psalm 23:1"},
+    {text:"For God so loved the world, that he gave his only begotten Son...", ref:"John 3:16"},
+    {text:"I can do all things through Christ which strengtheneth me.", ref:"Philippians 4:13"},
+    {text:"Trust in the LORD with all thine heart; and lean not unto thine own understanding.", ref:"Proverbs 3:5"},
+    {text:"The Lord is good to all: and his tender mercies are over all his works.", ref:"Psalm 145:9"},
+    {text:"For all have sinned, and come short of the glory of God;", ref:"Romans 3:23"},
+    {text:"And we know that all things work together for good to them that love God...", ref:"Romans 8:28"},
+    {text:"Be still, and know that I am God.", ref:"Psalm 46:10"},
+    {text:"Create in me a clean heart, O God; and renew a right spirit within me.", ref:"Psalm 51:10"},
+    {text:"Thy word is a lamp unto my feet, and a light unto my path.", ref:"Psalm 119:105"},
+    {text:"The LORD is my light and my salvation; whom shall I fear?", ref:"Psalm 27:1"},
+    {text:"Blessed are the meek: for they shall inherit the earth.", ref:"Matthew 5:5"},
+    {text:"Come unto me, all ye that labour and are heavy laden, and I will give you rest.", ref:"Matthew 11:28"},
+    {text:"Ask, and it shall be given you; seek, and ye shall find...", ref:"Matthew 7:7"},
+    {text:"For by grace are ye saved through faith; and that not of yourselves...", ref:"Ephesians 2:8"},
+    {text:"But they that wait upon the LORD shall renew their strength...", ref:"Isaiah 40:31"},
+    {text:"The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit.", ref:"Psalm 34:18"},
+    {text:"Casting all your care upon him; for he careth for you.", ref:"1 Peter 5:7"},
+    {text:"Seek ye first the kingdom of God, and his righteousness...", ref:"Matthew 6:33"},
+    {text:"For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord.", ref:"Romans 6:23"},
+    {text:"If any man be in Christ, he is a new creature: old things are passed away...", ref:"2 Corinthians 5:17"},
+    {text:"The fear of the LORD is the beginning of wisdom...", ref:"Proverbs 9:10"},
+    {text:"A merry heart doeth good like a medicine...", ref:"Proverbs 17:22"},
+    {text:"I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.", ref:"Psalm 23:4"},
+    {text:"Be strong and of a good courage, fear not, nor be afraid of them...", ref:"Deuteronomy 31:6"},
+    {text:"The joy of the LORD is your strength.", ref:"Nehemiah 8:10"},
+    {text:"Let not your heart be troubled: ye believe in God, believe also in me.", ref:"John 14:1"},
+    {text:"Ye are the light of the world. A city that is set on an hill cannot be hid.", ref:"Matthew 5:14"},
+    {text:"In everything give thanks: for this is the will of God in Christ Jesus concerning you.", ref:"1 Thessalonians 5:18"},
+    {text:"Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God.", ref:"Philippians 4:6"},
+    {text:"Thou shalt love the Lord thy God with all thy heart...", ref:"Matthew 22:37"},
+    {text:"Thou shalt love thy neighbour as thyself.", ref:"Matthew 22:39"},
+    {text:"Greater love hath no man than this, that a man lay down his life for his friends.", ref:"John 15:13"},
+    {text:"I am the way, the truth, and the life: no man cometh unto the Father, but by me.", ref:"John 14:6"},
+    {text:"For whatsoever a man soweth, that shall he also reap.", ref:"Galatians 6:7"},
+    {text:"Watch and pray, that ye enter not into temptation...", ref:"Mark 14:38"},
+    {text:"Be not overcome of evil, but overcome evil with good.", ref:"Romans 12:21"},
+    {text:"Honour thy father and thy mother...", ref:"Exodus 20:12"},
+    {text:"The LORD is righteous in all his ways, and holy in all his works.", ref:"Psalm 145:17"},
+    {text:"The just shall live by faith.", ref:"Romans 1:17"},
+    {text:"Wherewithal shall a young man cleanse his way? by taking heed thereto according to thy word.", ref:"Psalm 119:9"},
+    {text:"Delight thyself also in the LORD; and he shall give thee the desires of thine heart.", ref:"Psalm 37:4"},
+    {text:"A soft answer turneth away wrath...", ref:"Proverbs 15:1"},
+    {text:"Faith cometh by hearing, and hearing by the word of God.", ref:"Romans 10:17"},
+    {text:"Forgive, and ye shall be forgiven.", ref:"Luke 6:37"},
+    {text:"Greater is he that is in you, than he that is in the world.", ref:"1 John 4:4"},
+    {text:"He that dwelleth in the secret place of the Most High shall abide under the shadow of the Almighty.", ref:"Psalm 91:1"},
+    {text:"My grace is sufficient for thee: for my strength is made perfect in weakness.", ref:"2 Corinthians 12:9"},
+    {text:"The LORD will fight for you, and ye shall hold your peace.", ref:"Exodus 14:14"},
+    {text:"Let everything that hath breath praise the LORD. Praise ye the LORD.", ref:"Psalm 150:6"},
+    {text:"Commit thy way unto the LORD; trust also in him; and he shall bring it to pass.", ref:"Psalm 37:5"},
+    {text:"The righteous cry, and the LORD heareth, and delivereth them out of all their troubles.", ref:"Psalm 34:17"},
+    {text:"I will lift up mine eyes unto the hills, from whence cometh my help.", ref:"Psalm 121:1"},
+    {text:"He healeth the broken in heart, and bindeth up their wounds.", ref:"Psalm 147:3"},
+    {text:"For I know the thoughts that I think toward you, saith the LORD...", ref:"Jeremiah 29:11"},
+    {text:"Blessed are they which do hunger and thirst after righteousness: for they shall be filled.", ref:"Matthew 5:6"},
+    {text:"A friend loveth at all times, and a brother is born for adversity.", ref:"Proverbs 17:17"},
+    {text:"Jesus Christ the same yesterday, and to day, and for ever.", ref:"Hebrews 13:8"},
+    {text:"Casting down imaginations, and every high thing that exalteth itself against the knowledge of God...", ref:"2 Corinthians 10:5"},
+    {text:"Where two or three are gathered together in my name, there am I in the midst of them.", ref:"Matthew 18:20"},
+    {text:"Let us not be weary in well doing: for in due season we shall reap, if we faint not.", ref:"Galatians 6:9"},
+    {text:"Therefore if any man be in Christ, he is a new creature...", ref:"2 Corinthians 5:17"},
+    {text:"Be ye kind one to another, tenderhearted, forgiving one another...", ref:"Ephesians 4:32"},
+    {text:"But seek ye first the kingdom of God, and his righteousness...", ref:"Matthew 6:33"},
+    {text:"He that believeth on me hath everlasting life.", ref:"John 6:47"},
+    {text:"In my Father's house are many mansions...", ref:"John 14:2"},
+    {text:"Thy will be done in earth, as it is in heaven.", ref:"Matthew 6:10"},
+    {text:"If God be for us, who can be against us?", ref:"Romans 8:31"},
+    {text:"O give thanks unto the LORD; for he is good: for his mercy endureth for ever.", ref:"Psalm 118:1"},
+    {text:"The Lord is my strength and my song; he also is become my salvation.", ref:"Exodus 15:2"},
+    {text:"The name of the LORD is a strong tower: the righteous runneth into it, and is safe.", ref:"Proverbs 18:10"},
+    {text:"The LORD hath made all things for himself: yea, even the wicked for the day of evil.", ref:"Proverbs 16:4"},
+    {text:"God is our refuge and strength, a very present help in trouble.", ref:"Psalm 46:1"},
+    {text:"Hold fast the profession of our faith without wavering...", ref:"Hebrews 10:23"},
+    {text:"Whosoever will save his life shall lose it; and whosoever will lose his life for my sake shall find it.", ref:"Matthew 16:25"},
+    {text:"For where your treasure is, there will your heart be also.", ref:"Matthew 6:21"},
+    {text:"Man shall not live by bread alone, but by every word that proceedeth out of the mouth of God.", ref:"Matthew 4:4"},
+    {text:"Shew me thy ways, O LORD; teach me thy paths.", ref:"Psalm 25:4"},
+    {text:"I will never leave thee, nor forsake thee.", ref:"Hebrews 13:5"},
+    {text:"Come now, and let us reason together, saith the LORD...", ref:"Isaiah 1:18"},
+    {text:"Blessed are the peacemakers: for they shall be called the children of God.", ref:"Matthew 5:9"},
+    {text:"God is love; and he that dwelleth in love dwelleth in God, and God in him.", ref:"1 John 4:16"},
+    {text:"Render therefore unto Caesar the things which are Caesar's; and unto God the things that are God's.", ref:"Matthew 22:21"},
+    {text:"Let your moderation be known unto all men. The Lord is at hand.", ref:"Philippians 4:5"},
+    {text:"I have loved thee with an everlasting love...", ref:"Jeremiah 31:3"},
+    {text:"If any be afflicted, let him pray; if any be merry, let him sing psalms.", ref:"James 5:13"},
+    {text:"Wherewithal shall a young man cleanse his way? by taking heed thereto according to thy word.", ref:"Psalm 119:9"},
+    {text:"They that sow in tears shall reap in joy.", ref:"Psalm 126:5"},
+    {text:"Be not forgetful to entertain strangers...", ref:"Hebrews 13:2"},
+    {text:"He that covereth his sins shall not prosper: but whoso confesseth and forsaketh them shall have mercy.", ref:"Proverbs 28:13"},
+    {text:"A good man leaveth an inheritance to his children's children...", ref:"Proverbs 13:22"},
+    {text:"The LORD is merciful and gracious, slow to anger, and plenteous in mercy.", ref:"Psalm 103:8"},
+    {text:"Let everything that hath breath praise the LORD. Praise ye the LORD.", ref:"Psalm 150:6"},
+    {text:"Even a child is known by his doings, whether his work be pure, and whether it be right.", ref:"Proverbs 20:11"},
+    {text:"This is the day which the LORD hath made; we will rejoice and be glad in it.", ref:"Psalm 118:24"},
+    {text:"Rejoice evermore.", ref:"1 Thessalonians 5:16"},
+    {text:"Now faith is the substance of things hoped for, the evidence of things not seen.", ref:"Hebrews 11:1"},
+    {text:"Wherefore comfort yourselves together, and edify one another...", ref:"1 Thessalonians 5:11"},
+    {text:"He that spareth his rod hateth his son...", ref:"Proverbs 13:24"},
+    {text:"Cast thy bread upon the waters: for thou shalt find it after many days.", ref:"Ecclesiastes 11:1"},
+    {text:"The LORD is my shepherd; I shall not want.", ref:"Psalm 23:1"},
+    {text:"The path of the just is as the shining light...", ref:"Proverbs 4:18"},
+    {text:"Blessed are the pure in heart: for they shall see God.", ref:"Matthew 5:8"},
+    {text:"Be not anxious about tomorrow...", ref:"Matthew 6:34"},
+    {text:"A man’s heart deviseth his way: but the LORD directeth his steps.", ref:"Proverbs 16:9"}
+  ];
+
+  // Get current time in America/New_York and compute day index.
+  function nowInET(){
+    const now = new Date();
+    const str = now.toLocaleString("en-US", {timeZone:"America/New_York"});
+    return new Date(str);
+  }
+
+  function setVerse(){
+    const et = nowInET();
+    // day count since epoch in ET
+    const start = new Date("1970-01-01T00:00:00Z");
+    const etStart = new Date(start.toLocaleString("en-US", {timeZone:"America/New_York"}));
+    const msPerDay = 24*60*60*1000;
+    const diff = Math.floor((et - etStart) / msPerDay);
+    const idx = ((diff % verses.length) + verses.length) % verses.length;
+    const v = verses[idx];
+    document.getElementById("verse").innerText = v.text;
+    document.getElementById("ref").innerText = v.ref;
+  }
+
+  function scheduleNextMidnight(){
+    const et = nowInET();
+    const next = new Date(et);
+    next.setHours(24,0,0,0);
+    const ms = next - et;
+    setTimeout(function(){
+      setVerse();
+      scheduleNextMidnight();
+    }, ms + 50); // small buffer
+  }
+
+  setVerse();
+  scheduleNextMidnight();
+})();
+</script>
+</body>
+</html>
